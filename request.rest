@@ -1,0 +1,8 @@
+POST http://localhost:3000/category
+Content-type: application/json
+
+{
+  "title": "Kyki",
+  "image": "kykii.jpg",
+  "parent_id": null
+}
