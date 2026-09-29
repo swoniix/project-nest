@@ -1,3 +1,4 @@
+//вызывается с сервера
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -6,14 +7,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
-    //connection tp postgres
+    //connection to postgres
     TypeOrmModule.forRoot({
       type: "postgres",
-      host: 'localhost',
-      port: 5432,
-      username: 'swoniix',
-      password: 'q1w2e3r4//2',
-      database: 'library',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       autoLoadEntities: true, //types
     })
     , CategoryModule],
