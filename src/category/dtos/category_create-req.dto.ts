@@ -24,6 +24,9 @@ export class CategoryCreateReqDto {
   @IsBoolean({ message: 'is_show must be true or false' })
   is_show: boolean;
 
+  @IsOptional()
+  description: string
+  
   @IsString({ message: 'Slug must be a string' })
   @IsNotEmpty({ message: 'Slug must not be empty' })
   @Matches(/^[a-zA-Z0-9_-]+$/, {
