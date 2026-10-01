@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './category.entity.js';
 import { Repository } from 'typeorm';
 import { CategoryCreateReqDto } from './dtos/category_create-req.dto.js';
+import { CategoryUpdateReqDto } from './dtos/category_update-req.dto.js';
 
 
 @Injectable()
@@ -47,6 +48,11 @@ export class CategoryService {
   async delete(id: number): Promise<void> {
     const category = await this.getCatById(id)
     await this._repository.remove(category)
+  }
+  async patch(id: number, dto: CategoryUpdateReqDto,): Promise<Category> {
+    const category = await this.getCatById(id); //находим категорию если нет 404
+    this._repository.merge(category, dto); // переносим ток переданные поля 
+    return this._repository.save(category); //сохраняем изменения в постм
   }
 }
 
