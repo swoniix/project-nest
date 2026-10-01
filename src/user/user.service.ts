@@ -1,26 +1,56 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto.js';
-import { UpdateUserDto } from './dto/update-user.dto.js';
+import {
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { User } from './entities/user.entity.js';
+import { CreateUserReqDto } from './dto/create-user.req.dto.js';
+import { HashHelper } from '../helper/hash.help.js';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
-  }
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
 
-  findAll() {
-    return `This action returns all user`;
-  }
+    private readonly hashHelper: HashHelper,
+  ) { }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+  async create(dto: CreateUserReqDto) {
+    const email = dto.email.toLowerCase();
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+    const oldUser = await this.userRepository.findOneBy({
+      email,
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    if (oldUser) {
+      throw new ConflictException(
+        'User with this email is already registered',
+      );
+    }
+
+    const passwordHash = await this.hashHelper.hash(
+      dto.password,
+    );
+
+    const user = this.userRepository.create({
+      email,
+      fullname: dto.fullname,
+      password_hash: passwordHash,
+      is_block: false,
+    });
+
+    const savedUser = await this.userRepository.save(user);
+
+    return {
+      message: 'User registered successfully',
+      user: {
+        id: savedUser.id,
+        email: savedUser.email,
+        fullname: savedUser.fullname,
+      },
+    };
   }
 }
